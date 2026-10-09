@@ -66,7 +66,7 @@ class Terminal:
         sys.stdout.write(RESET_ATTRIBUTES)
 
     #  color management
-    def _get_color_sequence(
+    def __get_color_sequence(
         self,
         color: Color | tuple[int, int, int],
         foreground: bool,
@@ -109,7 +109,7 @@ class Terminal:
                 f"color must be an instance of Color, "
                 f"not {type(color).__name__}."
             )
-        sequence = self._get_color_sequence(color, foreground=True)
+        sequence = self.__get_color_sequence(color, foreground=True)
         sys.stdout.write(sequence)
 
     def set_background_color(
@@ -121,7 +121,7 @@ class Terminal:
                 f"color must be an instance of Color, "
                 f"not {type(color).__name__}."
             )
-        sequence = self._get_color_sequence(color, foreground=False)
+        sequence = self.__get_color_sequence(color, foreground=False)
         sys.stdout.write(sequence)
 
     def set_color(
