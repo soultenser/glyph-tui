@@ -1,0 +1,7 @@
+"""Terminal control utilities."""
+
+from .terminal import Terminal
+
+__all__ = [
+    "Terminal"
+]
