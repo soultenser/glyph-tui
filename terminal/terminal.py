@@ -66,28 +66,68 @@ class Terminal:
         sys.stdout.write(RESET_ATTRIBUTES)
 
     #  color management
-    def set_foreground_color(self, color: Color) -> None:
+    def _get_color_sequence(
+        self,
+        color: Color | tuple[int, int, int],
+        foreground: bool,
+    ) -> str:
+        if isinstance(color, Color):
+            colors = FOREGROUND_COLORS if foreground else BACKGROUND_COLORS
+            return f"{CSI}{colors[color]}m"
+
+        if not isinstance(color, tuple):
+            raise TypeError(
+                "Color must be a Color or an RGB tuple."
+            )
+
+        if len(color) != 3:
+            raise ValueError(
+                "RGB color must contain exactly three components."
+            )
+
+        if any(type(component) is not int for component in color):
+            raise TypeError(
+                "RGB components must be integers."
+            )
+
+        if any(not 0 <= component <= 255 for component in color):
+            raise ValueError(
+                "RGB components must be between 0 and 255."
+            )
+
+        code = 38 if foreground else 48
+        red, green, blue = color
+
+        return f"{CSI}{code};2;{red};{green};{blue}m"
+
+    def set_foreground_color(
+        self,
+        color: Color | tuple[int, int, int]
+    ) -> None:
         if not isinstance(color, Color):
             raise TypeError(
                 f"color must be an instance of Color, "
                 f"not {type(color).__name__}."
             )
-        sequence = f"{CSI}{FOREGROUND_COLORS[color]}m"
+        sequence = self._get_color_sequence(color, foreground=True)
         sys.stdout.write(sequence)
 
-    def set_background_color(self, color: Color) -> None:
+    def set_background_color(
+        self,
+        color: Color | tuple[int, int, int]
+    ) -> None:
         if not isinstance(color, Color):
             raise TypeError(
                 f"color must be an instance of Color, "
                 f"not {type(color).__name__}."
             )
-        sequence = f"{CSI}{BACKGROUND_COLORS[color]}m"
+        sequence = self._get_color_sequence(color, foreground=False)
         sys.stdout.write(sequence)
 
     def set_color(
         self,
-        foreground: Color | None = None,
-        background: Color | None = None,
+        foreground: Color | tuple[int, int, int] | None = None,
+        background: Color | tuple[int, int, int] | None = None,
     ) -> None:
 
         if foreground is not None:
