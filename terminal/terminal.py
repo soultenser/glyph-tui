@@ -134,3 +134,10 @@ class Terminal:
             self.set_foreground_color(color=foreground)
         if background is not None:
             self.set_background_color(color=background)
+
+    #  getting keyboard inputs
+    def getch(self) -> None:
+        pass
+
+    def getch_nowait(self) -> None:
+        pass
