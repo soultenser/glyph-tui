@@ -13,6 +13,7 @@ from .sequences import (
     CURSOR_POSITION,
     CURSOR_SHOW,
     FOREGROUND_COLORS,
+    RESET_ATTRIBUTES,
 )
 
 
@@ -26,13 +27,17 @@ class Terminal:
         sys.stdout.flush()
 
     def move_cursor(self, position: tuple[int, int]) -> None:
-        x, y = position
+        if not isinstance(position, tuple):
+            raise TypeError("position must be a tuple.")
+        if len(position) != 2:
+            raise ValueError("position must contain exactly two coordinates.")
 
+        x, y = position
         if type(x) is not int or type(y) is not int:
-            raise TypeError("Coordinates must be integers.")
+            raise TypeError("coordinates must be integers.")
 
         if x < 0 or y < 0:
-            raise ValueError("Coordinates must be non-negative integers.")
+            raise ValueError("coordinates must be non-negative integers.")
 
         sequence = CURSOR_POSITION.format(row=y + 1, column=x + 1)
         sys.stdout.write(sequence)
@@ -47,12 +52,18 @@ class Terminal:
         sys.stdout.write(CLEAR_LINE)
 
     def set_cursor_visible(self, visible: bool = True) -> None:
+        if not isinstance(visible, bool):
+            raise TypeError("visible must be a boolean.")
+
         sequence = CURSOR_SHOW if visible else CURSOR_HIDE
         sys.stdout.write(sequence)
 
     def get_size(self) -> tuple[int, int]:
         size = shutil.get_terminal_size()
         return (size.columns, size.lines)
+
+    def reset_attributes(self) -> None:
+        sys.stdout.write(RESET_ATTRIBUTES)
 
     #  color management
     def set_foreground_color(self, color: Color) -> None:

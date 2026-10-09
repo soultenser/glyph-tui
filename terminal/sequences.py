@@ -17,6 +17,8 @@ CURSOR_POSITION = f"{CSI}{{row}};{{column}}H"
 CURSOR_HIDE = f"{CSI}?25l"
 CURSOR_SHOW = f"{CSI}?25h"
 
+RESET_ATTRIBUTES = f"{CSI}0m"
+
 #  available colors
 FOREGROUND_COLORS = {
     Color.BLACK: 30,
