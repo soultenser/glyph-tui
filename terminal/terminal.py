@@ -109,7 +109,9 @@ class Terminal:
                 f"color must be an instance of Color, "
                 f"not {type(color).__name__}."
             )
-        sequence = self.__get_color_sequence(color, foreground=True)
+        sequence = self.__get_color_sequence(
+            color=color, foreground=True
+        )
         sys.stdout.write(sequence)
 
     def set_background_color(
