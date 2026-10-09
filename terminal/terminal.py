@@ -1,53 +1,32 @@
 
 import shutil
 import sys
-import typing
 
+from .colors import Color
 from .sequences import (
+    BACKGROUND_COLORS,
     CLEAR_LINE,
     CLEAR_SCREEN,
+    CSI,
     CURSOR_HOME,
     CURSOR_HIDE,
     CURSOR_POSITION,
     CURSOR_SHOW,
+    FOREGROUND_COLORS,
 )
 
 
 class Terminal:
 
+    #  basic functionalities
     def write(self, text: str) -> None:
         sys.stdout.write(text)
 
     def flush(self) -> None:
         sys.stdout.flush()
 
-    @typing.overload
-    def move_cursor(self, x: int, y: int) -> None:
-        ...
-
-    @typing.overload
     def move_cursor(self, position: tuple[int, int]) -> None:
-        ...
-
-    def move_cursor(
-        self,
-        x: int | tuple[int, int],
-        y: int | None = None,
-    ) -> None:
-
-        if isinstance(x, tuple):
-            if y is not None:
-                raise TypeError(
-                    "move_cursor() accepts either a position tuple (x, y) "
-                    "or two separate coordinates (x, y), not both."
-                )
-
-            x, y = x
-        elif y is None:
-            raise TypeError(
-                "move_cursor() missing required argument 'y'. "
-                "Use move_cursor(x, y) or move_cursor(position)."
-            )
+        x, y = position
 
         if type(x) is not int or type(y) is not int:
             raise TypeError("Coordinates must be integers.")
@@ -55,8 +34,8 @@ class Terminal:
         if x < 0 or y < 0:
             raise ValueError("Coordinates must be non-negative integers.")
 
-        cursor = CURSOR_POSITION.format(row=y + 1, column=x + 1)
-        sys.stdout.write(cursor)
+        sequence = CURSOR_POSITION.format(row=y + 1, column=x + 1)
+        sys.stdout.write(sequence)
 
     def move_cursor_home(self) -> None:
         sys.stdout.write(CURSOR_HOME)
@@ -68,9 +47,39 @@ class Terminal:
         sys.stdout.write(CLEAR_LINE)
 
     def set_cursor_visible(self, visible: bool = True) -> None:
-        cursor = CURSOR_SHOW if visible else CURSOR_HIDE
-        sys.stdout.write(cursor)
+        sequence = CURSOR_SHOW if visible else CURSOR_HIDE
+        sys.stdout.write(sequence)
 
     def get_size(self) -> tuple[int, int]:
         size = shutil.get_terminal_size()
         return (size.columns, size.lines)
+
+    #  color management
+    def set_foreground_color(self, color: Color) -> None:
+        if not isinstance(color, Color):
+            raise TypeError(
+                f"color must be an instance of Color, "
+                f"not {type(color).__name__}."
+            )
+        sequence = f"{CSI}{FOREGROUND_COLORS[color]}m"
+        sys.stdout.write(sequence)
+
+    def set_background_color(self, color: Color) -> None:
+        if not isinstance(color, Color):
+            raise TypeError(
+                f"color must be an instance of Color, "
+                f"not {type(color).__name__}."
+            )
+        sequence = f"{CSI}{BACKGROUND_COLORS[color]}m"
+        sys.stdout.write(sequence)
+
+    def set_color(
+        self,
+        foreground: Color | None = None,
+        background: Color | None = None,
+    ) -> None:
+
+        if foreground is not None:
+            self.set_foreground_color(color=foreground)
+        if background is not None:
+            self.set_background_color(color=background)
