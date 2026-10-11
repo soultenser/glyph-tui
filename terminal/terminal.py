@@ -1,11 +1,15 @@
 
+import select
 import shutil
 import sys
 import termios
 import tty
 
 from .colors import Color
-from .keys import KeyPress
+from .keys import (
+    KEY_SEQUENCES,
+    KeyPress
+)
 from .sequences import (
     BACKGROUND_COLORS,
     CLEAR_LINE,
@@ -20,10 +24,15 @@ from .sequences import (
 )
 
 
+class TerminalError(Exception):
+    ...
+
+
 class Terminal:
 
     def __init__(self) -> None:
         self.state: termios._AttrReturn | None = None
+        self.valid_sequences: set[str] = set(KEY_SEQUENCES.keys())
 
     #  basic functionalities
     def write(self, text: str) -> None:
@@ -159,10 +168,55 @@ class Terminal:
                 sys.stdin.fileno(), termios.TCSADRAIN, self.state
             )
             self.state = None
-        return None
+
+    def __get_escape_sequence(self) -> str | None:
+        sequence = "\033"
+        while True:
+            if not any(s.startswith(sequence) for s in self.valid_sequences):
+                break
+
+            try:
+                ready, _, _ = select.select([sys.stdin], [], [], 0.05)
+            except (OSError, ValueError):
+                self.restore()
+                raise
+
+            if not ready:
+                break
+
+            try:
+                sequence += sys.stdin.read(1)
+            except (OSError, ValueError):
+                self.restore()
+                raise
+
+        return sequence if sequence in self.valid_sequences else None
 
     def getch(self) -> KeyPress:
-        pass
+        self.raw()
+
+        try:
+            char = sys.stdin.read(1)
+        except (OSError, ValueError):
+            self.restore()
+            raise
+
+        if char == "":
+            self.restore()
+            raise TerminalError(
+                "unexpected end of input (EOF)."
+            )
+        if char != "\033":
+            return KeyPress(unicode=char)
+
+        sequence = self.__get_escape_sequence()
+        key = KEY_SEQUENCES.get(sequence, None)
+        if key is None:
+            self.restore()
+            raise TerminalError(
+                "unrecognized or incomplete escape sequence."
+            )
+        return KeyPress(key=key)
 
     def getch_nowait(self) -> KeyPress | None:
         pass
