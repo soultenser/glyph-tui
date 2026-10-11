@@ -1,8 +1,11 @@
 
 import shutil
 import sys
+import termios
+import tty
 
 from .colors import Color
+from .keys import KeyPress
 from .sequences import (
     BACKGROUND_COLORS,
     CLEAR_LINE,
@@ -18,6 +21,9 @@ from .sequences import (
 
 
 class Terminal:
+
+    def __init__(self) -> None:
+        self.state: None = None
 
     #  basic functionalities
     def write(self, text: str) -> None:
@@ -104,11 +110,7 @@ class Terminal:
         self,
         color: Color | tuple[int, int, int]
     ) -> None:
-        if not isinstance(color, Color):
-            raise TypeError(
-                f"color must be an instance of Color, "
-                f"not {type(color).__name__}."
-            )
+
         sequence = self.__get_color_sequence(
             color=color, foreground=True
         )
@@ -118,11 +120,7 @@ class Terminal:
         self,
         color: Color | tuple[int, int, int]
     ) -> None:
-        if not isinstance(color, Color):
-            raise TypeError(
-                f"color must be an instance of Color, "
-                f"not {type(color).__name__}."
-            )
+
         sequence = self.__get_color_sequence(
             color=color, foreground=False
         )
@@ -140,8 +138,17 @@ class Terminal:
             self.set_background_color(color=background)
 
     #  getting keyboard inputs
-    def getch(self) -> None:
+    def raw(self) -> None:
+        fd = sys.stdin.fileno()
+        if self.state is None:
+            self.state = termios.tcgetattr(fd)
+            tty.setraw(fd)
+
+    def restore() -> None:
         pass
 
-    def getch_nowait(self) -> None:
+    def getch(self) -> KeyPress:
+        pass
+
+    def getch_nowait(self) -> KeyPress | None:
         pass
