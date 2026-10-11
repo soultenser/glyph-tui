@@ -23,7 +23,7 @@ from .sequences import (
 class Terminal:
 
     def __init__(self) -> None:
-        self.state: None = None
+        self.state: termios._AttrReturn | None = None
 
     #  basic functionalities
     def write(self, text: str) -> None:
@@ -34,16 +34,23 @@ class Terminal:
 
     def move_cursor(self, position: tuple[int, int]) -> None:
         if not isinstance(position, tuple):
-            raise TypeError("position must be a tuple.")
+            raise TypeError(
+                "position must be a tuple."
+            )
         if len(position) != 2:
-            raise ValueError("position must contain exactly two coordinates.")
+            raise ValueError(
+                "position must contain exactly two coordinates."
+            )
 
         x, y = position
         if type(x) is not int or type(y) is not int:
-            raise TypeError("coordinates must be integers.")
-
+            raise TypeError(
+                "coordinates must be integers."
+            )
         if x < 0 or y < 0:
-            raise ValueError("coordinates must be non-negative integers.")
+            raise ValueError(
+                "coordinates must be non-negative integers."
+            )
 
         sequence = CURSOR_POSITION.format(row=y + 1, column=x + 1)
         sys.stdout.write(sequence)
@@ -59,7 +66,9 @@ class Terminal:
 
     def set_cursor_visible(self, visible: bool = True) -> None:
         if not isinstance(visible, bool):
-            raise TypeError("visible must be a boolean.")
+            raise TypeError(
+                "visible must be a boolean."
+            )
 
         sequence = CURSOR_SHOW if visible else CURSOR_HIDE
         sys.stdout.write(sequence)
@@ -144,8 +153,13 @@ class Terminal:
             self.state = termios.tcgetattr(fd)
             tty.setraw(fd)
 
-    def restore() -> None:
-        pass
+    def restore(self) -> None:
+        if self.state is not None:
+            termios.tcsetattr(
+                sys.stdin.fileno(), termios.TCSADRAIN, self.state
+            )
+            self.state = None
+        return None
 
     def getch(self) -> KeyPress:
         pass
