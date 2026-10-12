@@ -7,8 +7,9 @@ import tty
 
 from .colors import Color
 from .keys import (
+    Key,
     KEY_SEQUENCES,
-    KeyPress
+    KeyPress,
 )
 from .sequences import (
     BACKGROUND_COLORS,
@@ -175,20 +176,14 @@ class Terminal:
             if not any(s.startswith(sequence) for s in self.valid_sequences):
                 break
 
-            try:
-                ready, _, _ = select.select([sys.stdin], [], [], 0.05)
-            except (OSError, ValueError):
-                self.restore()
-                raise
+            ready, _, _ = select.select([sys.stdin], [], [], 0.05)
 
             if not ready:
                 break
-
-            try:
-                sequence += sys.stdin.read(1)
-            except (OSError, ValueError):
-                self.restore()
-                raise
+            nextchar = sys.stdin.read(1)
+            if not nextchar:
+                break
+            sequence += nextchar
 
         return sequence if sequence in self.valid_sequences else None
 
@@ -197,25 +192,24 @@ class Terminal:
 
         try:
             char = sys.stdin.read(1)
-        except (OSError, ValueError):
+            if char == "":
+                raise TerminalError(
+                    "unexpected end of input (EOF)."
+                )
+            if char != "\033":
+                key = KEY_SEQUENCES.get(char, None)
+                if key is None:
+                    return KeyPress(unicode=char)
+                return KeyPress(key=key)
+
+            sequence = self.__get_escape_sequence()
+        except Exception:
             self.restore()
             raise
 
-        if char == "":
-            self.restore()
-            raise TerminalError(
-                "unexpected end of input (EOF)."
-            )
-        if char != "\033":
-            return KeyPress(unicode=char)
-
-        sequence = self.__get_escape_sequence()
         key = KEY_SEQUENCES.get(sequence, None)
         if key is None:
-            self.restore()
-            raise TerminalError(
-                "unrecognized or incomplete escape sequence."
-            )
+            return KeyPress(key=Key.UNKNOWN)
         return KeyPress(key=key)
 
     def getch_nowait(self) -> KeyPress | None:

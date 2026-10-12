@@ -33,6 +33,7 @@ class Key(enum.Enum):
     F11 = enum.auto()
     F12 = enum.auto()
 
+    UNKNOWN = enum.auto()
 
 class Modifier(enum.Enum):
     CTRL = enum.auto()
