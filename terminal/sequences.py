@@ -1,6 +1,7 @@
 """ANSI escape sequences for terminal control."""
 
 from .colors import Color
+from .font_styles import FontStyle
 
 ESC = "\033"
 CSI = f"{ESC}["
@@ -56,4 +57,26 @@ BACKGROUND_COLORS = {
     Color.BRIGHT_MAGENTA: 105,
     Color.BRIGHT_CYAN: 106,
     Color.BRIGHT_WHITE: 107,
+}
+
+FONT_STYLES = {
+    FontStyle.BOLD: 1,
+    FontStyle.DIM: 2,
+    FontStyle.ITALIC: 3,
+    FontStyle.UNDERLINE: 4,
+    FontStyle.BLINK: 5,
+    FontStyle.REVERSE: 7,
+    FontStyle.HIDDEN: 8,
+    FontStyle.STRIKETHROUGH: 9
+}
+
+FONT_RESETS = {
+    FontStyle.BOLD: 22,
+    FontStyle.DIM: 22,
+    FontStyle.ITALIC: 23,
+    FontStyle.UNDERLINE: 24,
+    FontStyle.BLINK: 25,
+    FontStyle.REVERSE: 27,
+    FontStyle.HIDDEN: 28,
+    FontStyle.STRIKETHROUGH: 29
 }

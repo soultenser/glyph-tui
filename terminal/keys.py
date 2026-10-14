@@ -1,5 +1,6 @@
-import enum
+
 import dataclasses
+import enum
 
 
 class Key(enum.Enum):

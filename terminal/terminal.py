@@ -6,6 +6,7 @@ import termios
 import tty
 
 from .colors import Color
+from .font_styles import FontStyle
 from .keys import (
     Key,
     KeyPress,
@@ -20,6 +21,8 @@ from .sequences import (
     CURSOR_HIDE,
     CURSOR_POSITION,
     CURSOR_SHOW,
+    FONT_RESETS,
+    FONT_STYLES,
     FOREGROUND_COLORS,
     RESET_ATTRIBUTES,
 )
@@ -140,8 +143,8 @@ class Terminal:
         return KeyPress(key=key)
 
     def getch(self) -> KeyPress:
-        self.raw()
         try:
+            self.raw()
             char = sys.stdin.read(1)
             return self.__parse_keypress(char=char)
         except Exception:
@@ -149,8 +152,8 @@ class Terminal:
             raise
 
     def getch_nowait(self) -> KeyPress | None:
-        self.raw()
         try:
+            self.raw()
             ready, _, _ = select.select([sys.stdin], [], [], 0)
             if ready:
                 char = sys.stdin.read(1)
@@ -226,3 +229,9 @@ class Terminal:
             self.set_foreground_color(color=foreground)
         if background is not None:
             self.set_background_color(color=background)
+
+    def set_font_style(self, style: FontStyle) -> None:
+        sys.stdout.write(f"{CSI}{FONT_STYLES[style]}m")
+
+    def reset_font_style(self, style: FontStyle) -> None:
+        sys.stdout.write(f"{CSI}{FONT_RESETS[style]}m")
