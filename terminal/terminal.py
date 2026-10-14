@@ -90,72 +90,6 @@ class Terminal:
     def reset_attributes(self) -> None:
         sys.stdout.write(RESET_ATTRIBUTES)
 
-    #  color management
-    def __get_color_sequence(
-        self,
-        color: Color | tuple[int, int, int],
-        foreground: bool,
-    ) -> str:
-        if isinstance(color, Color):
-            colors = FOREGROUND_COLORS if foreground else BACKGROUND_COLORS
-            return f"{CSI}{colors[color]}m"
-
-        if not isinstance(color, tuple):
-            raise TypeError(
-                "Color must be a Color or an RGB tuple."
-            )
-
-        if len(color) != 3:
-            raise ValueError(
-                "RGB color must contain exactly three components."
-            )
-
-        if any(type(component) is not int for component in color):
-            raise TypeError(
-                "RGB components must be integers."
-            )
-
-        if any(not 0 <= component <= 255 for component in color):
-            raise ValueError(
-                "RGB components must be between 0 and 255."
-            )
-
-        code = 38 if foreground else 48
-        red, green, blue = color
-
-        return f"{CSI}{code};2;{red};{green};{blue}m"
-
-    def set_foreground_color(
-        self,
-        color: Color | tuple[int, int, int]
-    ) -> None:
-
-        sequence = self.__get_color_sequence(
-            color=color, foreground=True
-        )
-        sys.stdout.write(sequence)
-
-    def set_background_color(
-        self,
-        color: Color | tuple[int, int, int]
-    ) -> None:
-
-        sequence = self.__get_color_sequence(
-            color=color, foreground=False
-        )
-        sys.stdout.write(sequence)
-
-    def set_color(
-        self,
-        foreground: Color | tuple[int, int, int] | None = None,
-        background: Color | tuple[int, int, int] | None = None,
-    ) -> None:
-
-        if foreground is not None:
-            self.set_foreground_color(color=foreground)
-        if background is not None:
-            self.set_background_color(color=background)
-
     #  getting keyboard inputs
     def raw(self) -> None:
         fd = sys.stdin.fileno()
@@ -226,3 +160,69 @@ class Terminal:
         except Exception:
             self.restore()
             raise
+
+    #  color management
+    def __get_color_sequence(
+        self,
+        color: Color | tuple[int, int, int],
+        foreground: bool,
+    ) -> str:
+        if isinstance(color, Color):
+            colors = FOREGROUND_COLORS if foreground else BACKGROUND_COLORS
+            return f"{CSI}{colors[color]}m"
+
+        if not isinstance(color, tuple):
+            raise TypeError(
+                "Color must be a Color or an RGB tuple."
+            )
+
+        if len(color) != 3:
+            raise ValueError(
+                "RGB color must contain exactly three components."
+            )
+
+        if any(type(component) is not int for component in color):
+            raise TypeError(
+                "RGB components must be integers."
+            )
+
+        if any(not 0 <= component <= 255 for component in color):
+            raise ValueError(
+                "RGB components must be between 0 and 255."
+            )
+
+        code = 38 if foreground else 48
+        red, green, blue = color
+
+        return f"{CSI}{code};2;{red};{green};{blue}m"
+
+    def set_foreground_color(
+        self,
+        color: Color | tuple[int, int, int]
+    ) -> None:
+
+        sequence = self.__get_color_sequence(
+            color=color, foreground=True
+        )
+        sys.stdout.write(sequence)
+
+    def set_background_color(
+        self,
+        color: Color | tuple[int, int, int]
+    ) -> None:
+
+        sequence = self.__get_color_sequence(
+            color=color, foreground=False
+        )
+        sys.stdout.write(sequence)
+
+    def set_color(
+        self,
+        foreground: Color | tuple[int, int, int] | None = None,
+        background: Color | tuple[int, int, int] | None = None,
+    ) -> None:
+
+        if foreground is not None:
+            self.set_foreground_color(color=foreground)
+        if background is not None:
+            self.set_background_color(color=background)
