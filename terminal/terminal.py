@@ -8,9 +8,9 @@ import tty
 from .colors import Color
 from .keys import (
     Key,
-    KEY_SEQUENCES,
     KeyPress,
 )
+from .key_sequences import KEY_SEQUENCES
 from .sequences import (
     BACKGROUND_COLORS,
     CLEAR_LINE,
@@ -187,30 +187,42 @@ class Terminal:
 
         return sequence if sequence in self.valid_sequences else None
 
-    def getch(self) -> KeyPress:
-        self.raw()
+    def __parse_keypress(self, char: str) -> KeyPress:
+        if char == "":
+            raise TerminalError(
+                "unexpected end of input (EOF)."
+            )
+        if char != "\033":
+            key = KEY_SEQUENCES.get(char, None)
+            if key is None:
+                return KeyPress(unicode=char)
+            return KeyPress(key=key)
 
-        try:
-            char = sys.stdin.read(1)
-            if char == "":
-                raise TerminalError(
-                    "unexpected end of input (EOF)."
-                )
-            if char != "\033":
-                key = KEY_SEQUENCES.get(char, None)
-                if key is None:
-                    return KeyPress(unicode=char)
-                return KeyPress(key=key)
-
-            sequence = self.__get_escape_sequence()
-        except Exception:
-            self.restore()
-            raise
+        sequence = self.__get_escape_sequence()
 
         key = KEY_SEQUENCES.get(sequence, None)
         if key is None:
             return KeyPress(key=Key.UNKNOWN)
         return KeyPress(key=key)
 
+    def getch(self) -> KeyPress:
+        self.raw()
+        try:
+            char = sys.stdin.read(1)
+            return self.__parse_keypress(char=char)
+        except Exception:
+            self.restore()
+            raise
+
     def getch_nowait(self) -> KeyPress | None:
-        pass
+        self.raw()
+        try:
+            ready, _, _ = select.select([sys.stdin], [], [], 0)
+            if ready:
+                char = sys.stdin.read(1)
+                return self.__parse_keypress(char=char)
+            else:
+                return None
+        except Exception:
+            self.restore()
+            raise
