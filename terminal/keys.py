@@ -1,9 +1,13 @@
 
+"""Keyboard key definitions and parsed key press values."""
+
 import dataclasses
 import enum
 
 
 class Key(enum.Enum):
+    """Enumeration of supported terminal keys and special inputs."""
+
     UP = enum.auto()
     DOWN = enum.auto()
     LEFT = enum.auto()
@@ -37,19 +41,24 @@ class Key(enum.Enum):
     UNKNOWN = enum.auto()
 
 
-class Modifier(enum.Enum):
-    CTRL = enum.auto()
-    ALT = enum.auto()
-    SHIFT = enum.auto()
-
-
 @dataclasses.dataclass(frozen=True)
 class KeyPress:
+    """Represents a single terminal key press.
+
+    Exactly one of ``key`` or ``unicode`` must be provided.
+    """
+
     key: Key | None = None
     unicode: str | None = None
-    modifiers: frozenset[Modifier] = frozenset()
 
     def __post_init__(self) -> None:
+        """Validate the key press fields and value constraints.
+
+        Raises:
+            ValueError: If both or neither of ``key`` and ``unicode`` are set,
+                or a Unicode character is not exactly one code point long.
+            TypeError: If any field has an unsupported type.
+        """
         if (self.key is None) == (self.unicode is None):
             raise ValueError(
                 "exactly one of 'key' or 'unicode' must be provided."
@@ -67,11 +76,3 @@ class KeyPress:
                 raise ValueError(
                     "unicode must contain exactly one character."
                 )
-        if not isinstance(self.modifiers, frozenset):
-            raise TypeError(
-                "modifiers must be a frozenset."
-            )
-        if not all(isinstance(m, Modifier) for m in self.modifiers):
-            raise TypeError(
-                "all modifiers must be instances of Modifier."
-            )

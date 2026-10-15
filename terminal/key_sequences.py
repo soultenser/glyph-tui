@@ -1,3 +1,4 @@
+
 """Key input sequences and their corresponding logical keys."""
 
 from .keys import Key

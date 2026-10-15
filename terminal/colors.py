@@ -1,8 +1,12 @@
 
+"""Named terminal colors used for foreground and background styling."""
+
 from enum import Enum
 
 
 class Color(Enum):
+    """Terminal color names supported by ANSI styling helpers."""
+
     BLACK = "black"
     RED = "red"
     GREEN = "green"

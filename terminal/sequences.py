@@ -1,3 +1,4 @@
+
 """ANSI escape sequences for terminal control."""
 
 from .colors import Color

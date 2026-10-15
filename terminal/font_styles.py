@@ -1,8 +1,12 @@
 
+"""Supported terminal font styles used for ANSI text formatting."""
+
 import enum
 
 
 class FontStyle(enum.Enum):
+    """Terminal text styles recognized by the ANSI escape sequences."""
+
     BOLD = enum.auto()
     DIM = enum.auto()
     ITALIC = enum.auto()
@@ -11,4 +15,3 @@ class FontStyle(enum.Enum):
     REVERSE = enum.auto()
     HIDDEN = enum.auto()
     STRIKETHROUGH = enum.auto()
-
