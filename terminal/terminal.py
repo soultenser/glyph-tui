@@ -215,7 +215,7 @@ class Terminal:
         try:
             char = sys.stdin.read(1)
             return self.__parse_keypress(char=char)
-        except Exception:
+        except BaseException:
             self.restore()
             raise
 
@@ -232,7 +232,7 @@ class Terminal:
                 return self.__parse_keypress(char=char)
             else:
                 return None
-        except Exception:
+        except BaseException:
             self.restore()
             raise
 
