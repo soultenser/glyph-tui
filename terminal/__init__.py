@@ -6,7 +6,10 @@ from .keys import (
     Key,
     KeyPress,
 )
-from .terminal import Terminal
+from .terminal import (
+    Terminal,
+    TerminalError
+)
 
 __all__ = [
     "Color",
@@ -14,4 +17,5 @@ __all__ = [
     "Key",
     "KeyPress",
     "Terminal",
+    "TerminalError",
 ]
