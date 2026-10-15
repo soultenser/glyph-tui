@@ -197,10 +197,13 @@ class Terminal:
             return KeyPress(key=key)
 
         sequence = self.__get_escape_sequence()
+        if sequence is None:
+            return KeyPress(key=Key.UNKNOWN)
 
         key = KEY_SEQUENCES.get(sequence, None)
         if key is None:
             return KeyPress(key=Key.UNKNOWN)
+
         return KeyPress(key=key)
 
     def getch(self) -> KeyPress:
