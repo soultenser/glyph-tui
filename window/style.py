@@ -116,7 +116,6 @@ class Style:
         self.__padding = value
 
 
-@dc.dataclass
 class StyleCell:
     def __init__(self) -> None:
         self.background: t_color | None = None
@@ -170,7 +169,7 @@ class StyleCell:
         return self.__font_style
 
     @font_style.setter
-    def font_style(self, value: set[FontStyle]) -> None:
-        if any(not isinstance(style, FontStyle) for style in value):
+    def font_style(self, value: set[FontStyle] | None) -> None:
+        if value and any(not isinstance(style, FontStyle) for style in value):
             raise ValueError("font_style must be a set of FontStyle values.")
         self.__font_style = value
