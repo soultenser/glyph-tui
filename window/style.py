@@ -21,8 +21,7 @@ class Alignment(enum.Enum):
 
 class Style:
     def __init__(self) -> None:
-        self.border: bool = False
-        self.border_color: t_color = Color.WHITE
+        self.border: t_color | None = None
         self.background: t_color | None = None
         self.foreground: t_color | None = None
         self.font_style: set[FontStyle] = set()
@@ -33,18 +32,6 @@ class Style:
         self.justify_title: Alignment = Alignment.LEFT
         self.footer: str = ""
         self.justify_footer: Alignment = Alignment.LEFT
-
-    @property
-    def border(self) -> bool:
-        return bool(self.__border)
-
-    @border.setter
-    def border(self, value: bool) -> None:
-        if value not in (True, False, 1, 0):
-            raise ValueError(
-                "border must be a boolean or an integer equal to 0 or 1"
-            )
-        self.__border = value
 
     def __color_validator(color: t_color) -> None:
         if not isinstance(color, tuple) and not isinstance(color, Color):
@@ -68,13 +55,44 @@ class Style:
             )
 
     @property
-    def border_color(self) -> t_color:
-        return self.__border_color
+    def border(self) -> bool:
+        return self.__border
 
-    @border_color.setter
-    def border_color(self, value: t_color) -> None:
-        self.__color_validator(color=value)
-        self.__border_color = value
+    @border.setter
+    def border(self, value: t_color | None) -> None:
+        if value is not None:
+            self.__color_validator(color=value)
+        self.__border = value
+
+    @property
+    def background(self) -> t_color | None:
+        return self.__background
+
+    @background.setter
+    def background(self, value: t_color | None) -> None:
+        if value is not None:
+            self.__color_validator(color=value)
+        self.__background = value
+
+    @property
+    def foreground(self) -> t_color | None:
+        return self.__foreground
+
+    @foreground.setter
+    def foreground(self, value: t_color | None) -> None:
+        if value is not None:
+            self.__color_validator(color=value)
+        self.__foreground = value
+
+    @property
+    def font_style(self) -> set[FontStyle]:
+        return self.__font_style
+
+    @font_style.setter
+    def font_style(self, value: set[FontStyle]) -> None:
+        if any(not isinstance(style, FontStyle) for style in value):
+            raise ValueError()
+        self.__font_style = value
 
 
 @dc.dataclass
