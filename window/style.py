@@ -1,5 +1,4 @@
 
-import dataclasses as dc
 import enum
 
 from terminal import (
@@ -129,20 +128,19 @@ class StyleCell:
                 "color must be a Color or an RGB tuple."
             )
 
-        if len(color) != 3:
-            raise ValueError(
-                "RGB color must contain exactly three components."
-            )
-
-        if any(type(component) is not int for component in color):
-            raise TypeError(
-                "RGB components must be integers."
-            )
-
-        if any(not 0 <= component <= 255 for component in color):
-            raise ValueError(
-                "RGB components must be between 0 and 255."
-            )
+        if isinstance(color, tuple):
+            if len(color) != 3:
+                raise ValueError(
+                    "RGB color must contain exactly three components."
+                )
+            if any(type(component) is not int for component in color):
+                raise TypeError(
+                    "RGB components must be integers."
+                )
+            if any(not 0 <= component <= 255 for component in color):
+                raise ValueError(
+                    "RGB components must be between 0 and 255."
+                )
 
     @property
     def background(self) -> t_color | None:
