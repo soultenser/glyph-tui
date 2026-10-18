@@ -55,6 +55,20 @@ class Style:
                     "RGB components must be between 0 and 255."
                 )
 
+    @staticmethod
+    def __position_validator(
+        position: Position,
+        directions: tuple[Position, Position, Position]
+    ) -> None:
+        if not isinstance(position, Position):
+            raise TypeError(
+                "position must be a Position."
+            )
+        if position not in directions:
+            raise ValueError(
+                "position is not allowed here."
+            )
+
     @property
     def border(self) -> t_color | None:
         return self.__border
@@ -86,13 +100,19 @@ class Style:
         self.__foreground = value
 
     @property
-    def font_style(self) -> set[FontStyle]:
-        return self.__font_style
+    def font_style(self) -> frozenset[FontStyle]:
+        return frozenset(self.__font_style)
 
     @font_style.setter
     def font_style(self, value: set[FontStyle]) -> None:
+        if not isinstance(value, set):
+            raise TypeError(
+                "font_style must be a set of FontStyle values."
+            )
         if any(not isinstance(style, FontStyle) for style in value):
-            raise ValueError("font_style must be a set of FontStyle values.")
+            raise ValueError(
+                "font_style must be a set of FontStyle values."
+            )
         self.__font_style = value
 
     @property
@@ -102,20 +122,89 @@ class Style:
     @padding.setter
     def padding(self, value: tuple[int, int, int, int]) -> None:
         if not isinstance(value, tuple):
-            raise ValueError("padding must be a tuple of four integers.")
-
+            raise TypeError(
+                "padding must be a tuple of four integers."
+            )
         if len(value) != 4:
-            raise ValueError("padding must contain exactly four values.")
-
+            raise ValueError(
+                "padding must contain exactly four values."
+            )
         if any(type(nbr) is not int for nbr in value):
-            raise TypeError("padding values must be integers.")
-
+            raise TypeError(
+                "padding values must be integers."
+            )
         if any(nbr < 0 for nbr in value):
-            raise ValueError("padding values must be non-negative integers.")
+            raise ValueError(
+                "padding values must be non-negative integers."
+            )
         self.__padding = value
 
+    @property
+    def justify(self) -> Position:
+        return self.__justify
 
-class StyleCell:
+    @justify.setter
+    def justify(self, value: Position) -> None:
+        self.__position_validator(
+            position=value,
+            directions=(Position.LEFT, Position.RIGHT, Position.CENTER)
+        )
+        self.__justify = value
+
+    @property
+    def align(self) -> Position:
+        return self.__align
+
+    @align.setter
+    def align(self, value: Position) -> None:
+        self.__position_validator(
+            position=value,
+            directions=(Position.TOP, Position.BOTTOM, Position.CENTER)
+        )
+        self.__align = value
+
+    @property
+    def title(self) -> str:
+        return self.__title
+
+    @title.setter
+    def title(self, value: object) -> None:
+        self.__title = str(value)
+
+    @property
+    def justify_title(self) -> Position:
+        return self.__justify_title
+
+    @justify_title.setter
+    def justify_title(self, value: Position) -> None:
+        self.__position_validator(
+            position=value,
+            directions=(Position.LEFT, Position.RIGHT, Position.CENTER)
+        )
+        self.__justify_title = value
+
+    @property
+    def footer(self) -> str:
+        return self.__footer
+
+    @footer.setter
+    def footer(self, value: object) -> None:
+        self.__footer = str(value)
+
+    @property
+    def justify_footer(self) -> Position:
+        return self.__justify_footer
+
+    @justify_footer.setter
+    def justify_footer(self, value: Position) -> None:
+        self.__position_validator(
+            position=value,
+            directions=(Position.LEFT, Position.RIGHT, Position.CENTER)
+        )
+        self.__justify_footer = value
+
+
+class CellStyle:
     def __init__(self) -> None:
         self.background: t_color | None = None
         self.foreground: t_color | None = None
@@ -163,11 +252,19 @@ class StyleCell:
         self.__foreground = value
 
     @property
-    def font_style(self) -> set[FontStyle]:
-        return self.__font_style
+    def font_style(self) -> frozenset[FontStyle] | None:
+        if self.__font_style is None:
+            return None
+        return frozenset(self.__font_style)
 
     @font_style.setter
     def font_style(self, value: set[FontStyle] | None) -> None:
+        if value is not None and not isinstance(value, set):
+            raise TypeError(
+                "font_style must be a set of FontStyle values."
+            )
         if value and any(not isinstance(style, FontStyle) for style in value):
-            raise ValueError("font_style must be a set of FontStyle values.")
+            raise TypeError(
+                "font_style must be a set of FontStyle values."
+            )
         self.__font_style = value
