@@ -13,7 +13,7 @@ class Window:
         self.width = width
         self.height = height
         self.style = Style()
-        self.__children = []
+        self.__children: list["Window"] = []
         self.__parent = None
 
     @staticmethod
@@ -87,8 +87,7 @@ class Window:
     def parent(self) -> "Window" | None:
         return self.__parent
 
-    @parent.setter
-    def parent(self, value: "Window" | None) -> None:
+    def _set_parent(self, value: "Window" | None) -> None:
         if value is not None:
             if not isinstance(value, Window):
                 raise TypeError(
@@ -97,8 +96,37 @@ class Window:
         self.__parent = value
 
     @property
-    def children(self) -> "Window":
-        return self.__children
+    def children(self) -> list["Window"]:
+        return self.__children.copy()
 
     def add_child(self, child: "Window") -> None:
-        pass
+        if not isinstance(child, Window):
+            raise TypeError(
+                "child must be a Window instance"
+            )
+        if child.parent is not None:
+            raise ValueError(
+                "child already has a parent"
+            )
+        parent = self
+        while parent:
+            if parent is child:
+                raise ValueError(
+                    "adding child would create a circular hierarchy"
+                )
+            parent = parent.parent
+
+        self.__children.append(child)
+        child._set_parent(self)
+
+    def remove_child(self, child: "Window") -> None:
+        if not isinstance(child, Window):
+            raise TypeError(
+                "child must be a Window instance"
+            )
+        if child not in self.__children:
+            raise ValueError(
+                "child is not a child of this Window"
+            )
+        self.__children.remove(child)
+        child._set_parent(None)
