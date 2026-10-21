@@ -1,5 +1,6 @@
 
 from .style import Style
+from .cell import Cell
 
 
 class Window:
@@ -13,8 +14,14 @@ class Window:
         self.width = width
         self.height = height
         self.style = Style()
+        self.__visible_width = width
+        self.__visible_height = height
         self.__children: list["Window"] = []
         self.__parent = None
+        self.__buffer = [
+            [Cell() for _ in range(self.width)]
+            for _ in range(self.height)
+        ]
 
     @staticmethod
     def __validate_value(value: int) -> None:
@@ -130,3 +137,6 @@ class Window:
             )
         self.__children.remove(child)
         child._set_parent(None)
+
+    def handle_resize(self) -> None:
+        pass
